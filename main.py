@@ -1,5 +1,7 @@
 import os
 
+from fastapi import Depends, FastAPI, Request
+
 from linebot import LineBotApi, WebhookParser
 from linebot.exceptions import InvalidSignatureError, LineBotApiError
 from linebot.models import ImageSendMessage, MessageEvent, TextSendMessage
@@ -7,7 +9,10 @@ from linebot.models import ImageSendMessage, MessageEvent, TextSendMessage
 line_bot_api = LineBotApi(os.environ.get('LINE_CHANNEL_ACCESS_TOKEN'))
 webhook: WebhookParser = WebhookParser(os.environ.get('LINE_CHANNEL_SECRET'))
 
+app = FastAPI()
 
+
+@app.post('/')
 def callback(request):
   if request.method == 'POST':
     signature = request.META['HTTP_X_LINE_SIGNATURE']
@@ -26,3 +31,12 @@ def callback(request):
     return {'state': True}
   else:
     return {'state': False}
+
+
+if __name__ == '__main__':
+  import uvicorn
+  uvicorn.run('main:app',
+              host='0.0.0.0',
+              port=3000,
+              reload=True,
+              log_level='debug')
