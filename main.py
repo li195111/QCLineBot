@@ -1,6 +1,6 @@
 import os
 
-from fastapi import Depends, FastAPI, Request
+from fastapi import FastAPI, Request
 
 from linebot import LineBotApi, WebhookParser
 from linebot.exceptions import InvalidSignatureError, LineBotApiError
@@ -12,8 +12,9 @@ webhook: WebhookParser = WebhookParser(os.environ.get('LINE_CHANNEL_SECRET'))
 app = FastAPI()
 
 
+@app.get('/')
 @app.post('/')
-def callback(request):
+def callback(request: Request):
   if request.method == 'POST':
     signature = request.META['HTTP_X_LINE_SIGNATURE']
     body = request.body.decode('utf-8')
@@ -23,6 +24,8 @@ def callback(request):
     except InvalidSignatureError:
       return {'state': False}
     except LineBotApiError:
+      return {'state': False}
+    except Exception:
       return {'state': False}
     for event in events:
       if isinstance(event, MessageEvent):
